@@ -1,26 +1,38 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useState, useEffect} from 'react';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+  const [quotes, setQuotes] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    fetch("https://the-one-api.herokuapp.com/v1/character/5cd99d4bde30eff6ebccfea0/quote", {
+      method: 'GET',  
+      headers: {
+        'Authorization': 'Bearer TdMVtc1gvFhNa6jM4ELm'
+      }
+    })
+      .then(res => res.json())
+      .then(json => {
+        setIsLoaded(true);
+        setQuotes(json.docs.filter(
+          quote => quote.dialog.length > 20 && quote.dialog.length < 100
+        ))
+      })
+      .catch(error => console.log(error));
+    }, []);
+
+  if (!isLoaded) {
+    return <div>Loading...</div>
+  } else {
+    return (
+      <div className="App">
+        {quotes.map(quote => (
+          <p key={quote._id}>{quote.dialog}</p>
+        ))}
+      </div>
+    );
+  }
 }
 
 export default App;
